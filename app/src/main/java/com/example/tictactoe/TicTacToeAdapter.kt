@@ -16,8 +16,6 @@ class TicTacToeAdapter(
 
     fun updateBoard(newBoard: List<String>) {
         board = newBoard
-        val currentState = viewModel.state.value!!
-        viewModel.saveState(currentState)
         notifyDataSetChanged()  // 전체 보드를 갱신, 리스트의 크기와 아이템이 변경되는 경우 사용하는 함수. 즉, 동적 데이터 뷰 업데이트.
     }
 
@@ -43,6 +41,8 @@ class TicTacToeAdapter(
             button.text = cellValue // text가 적히는 부분
             button.setOnClickListener {
                 viewModel.onCellClicked(position)  // ViewModel에 클릭 전달
+                val currentState = viewModel.state.value!!
+                viewModel.saveState(currentState)
             }
         }
     }

@@ -52,12 +52,11 @@ class TicTacToeViewModel : ViewModel() {
 
     fun saveState(state: TicTacToeState) {
         history.add(state)
-        _state.value = state
     } // 자동으로 각 state 저장하게 끔 하는 ..
 
     fun goToState(index: Int) {
         if (index in history.indices) {
-            _state.value = history[index]
+            _state.value = history[index-1]
         }
     }
 

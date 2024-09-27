@@ -19,25 +19,25 @@ sealed class ListItem {
 
     data class AfterItem(val state : RecordState) : ListItem() // data class를 input으로 하는.
 
+    data class EndItem(val state : RecordState , val text : String) : ListItem() // 마지막 승리 띄우기 위해.
 }
 
-class RecordAdapter (private val items: MutableList<ListItem>, private val viewModel:TicTacToeViewModel) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    var pos : Int = 0
+class RecordAdapter (private var items: MutableList<ListItem>, private val viewModel:TicTacToeViewModel) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
 
     companion object {
         const val TYPE_START = 0
         const val TYPE_AFTER = 1
+        const val TYPE_END = 2
     }
     // 처음 '게임 시작' 버튼과 나머지 구분.
 
     override fun getItemViewType(position: Int): Int { // position은 자동으로 받아들이는 매개변수
-        pos = position
         return when (items[position]) {
             is ListItem.StartItem -> TYPE_START
             is ListItem.AfterItem -> TYPE_AFTER
+            is ListItem.EndItem -> TYPE_END
         }
     }
 
@@ -55,6 +55,12 @@ class RecordAdapter (private val items: MutableList<ListItem>, private val viewM
                 AfterViewHolder(view, viewModel)
             }
 
+            TYPE_END -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_end, parent, false) // item_start라는 xml을 view라는 변수에 저장
+                EndViewHolder(view, viewModel)
+            }
+
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -66,11 +72,16 @@ class RecordAdapter (private val items: MutableList<ListItem>, private val viewM
         when (holder) {
             is StartViewHolder -> holder.bind((items[position] as ListItem.StartItem).text) // .text는 처음에 받은 매개변수
             is AfterViewHolder -> {
-                val value = viewModel.state.value
+
                 holder.bind("$position 턴")
-                holder.bind_box((items[position] as ListItem.AfterItem).state.board, value?.isGameOver, value?.winner, position)
+                holder.bind_box((items[position] as ListItem.AfterItem).state.board, position)
 
                 // n번째 턴으로 바꾸기.
+            }
+            is EndViewHolder -> {
+                val value = viewModel.state.value
+                holder.bind("$position 턴")
+                holder.bind_box((items[position] as ListItem.EndItem).state.board, value?.isGameOver, value?.winner, position)
             }
         }
     }
@@ -86,6 +97,37 @@ class RecordAdapter (private val items: MutableList<ListItem>, private val viewM
     }
 
     inner class AfterViewHolder(itemView: View, private val viewModel: TicTacToeViewModel) :
+        RecyclerView.ViewHolder(itemView) {
+        private val turn: TextView = itemView.findViewById(R.id.turn)
+
+        private val button: TextView = itemView.findViewById(R.id.back)
+
+        fun bind(text: String) {
+            turn.text = text
+        }
+
+        fun bind_box(box: List<String>, position: Int) { // box의 글자 업데이트
+            itemView.findViewById<TextView>(R.id.box_1).text = box[0]
+            itemView.findViewById<TextView>(R.id.box_2).text = box[1]
+            itemView.findViewById<TextView>(R.id.box_3).text = box[2]
+            itemView.findViewById<TextView>(R.id.box_4).text = box[3]
+            itemView.findViewById<TextView>(R.id.box_5).text = box[4]
+            itemView.findViewById<TextView>(R.id.box_6).text = box[5]
+            itemView.findViewById<TextView>(R.id.box_7).text = box[6]
+            itemView.findViewById<TextView>(R.id.box_8).text = box[7]
+            itemView.findViewById<TextView>(R.id.box_9).text = box[8]
+
+
+            button.setOnClickListener{
+                viewModel.goToState(position)
+                updateItems(goToState(position))
+            }
+
+        }
+
+    }
+
+    inner class EndViewHolder(itemView: View, private val viewModel: TicTacToeViewModel) :
         RecyclerView.ViewHolder(itemView) {
         private val turn: TextView = itemView.findViewById(R.id.turn)
 
@@ -115,14 +157,45 @@ class RecordAdapter (private val items: MutableList<ListItem>, private val viewM
 
             button.setOnClickListener{
                 viewModel.goToState(position)
+                updateItems(goToState(position))
             }
 
         }
 
     }
 
+
+    // 서랍도 똑같은 방식으로 데이터 저장\
+
+    private var history =  mutableListOf<ListItem>(ListItem.StartItem("게임 시작"))
+
+    fun saveState(state: ListItem) {
+        history.add(state)
+    } // 자동으로 각 state 저장하게 끔 하는 ..
+
+    fun goToState(index: Int): List<ListItem> {
+        if (index in history.indices) {  // index가 0보다 큰 경우에만 index-1 접근
+//            if (index > 0) {
+//                items[index] = history[index]
+//            } else {
+//                items[index] = history[index]
+//            }
+
+            val newItems = history.take(index+1)
+            history = history.take(index+1).toMutableList()
+            return newItems
+        }
+        return emptyList()
+    }
+
+    fun updateItems(newItems: List<ListItem>) {
+        items = newItems.toMutableList()
+        notifyDataSetChanged()
+    }
+
     fun addItem(item: ListItem) {
         items.add(item)  // 리스트에 새로운 아이템 추가
+        saveState(this.items[items.size-1])
         notifyItemInserted(items.size - 1)  // 새로운 아이템이 추가된 위치에서 RecyclerView에 갱신 요청
     }
 
@@ -131,9 +204,20 @@ class RecordAdapter (private val items: MutableList<ListItem>, private val viewM
 
 
     fun updateBoard(state: TicTacToeState) {
-        if (state.board != List(9) { "" })
+        if (state.board != List(9) { "" } && state.isGameOver != true)
             this.addItem(ListItem.AfterItem(RecordState(state.board))) // recordAdapter에 보드 데이터 할당
+        else {
+            var text : String = ""
 
+            if (state.isGameOver == true && state.winner != null )
+            {text = "${state.winner} 승리!"
+                this.addItem(ListItem.EndItem(RecordState(state.board), text))
+            }
+            else if (state.isGameOver == true)
+            {text = "무승부"
+                this.addItem(ListItem.EndItem(RecordState(state.board), text))}
+        }
+
+        }
     }
 
-}
