@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 
 
 class TicTacToeViewModel : ViewModel() {
-    private val _state = MutableLiveData(TicTacToeState()) // 게임의 현재 상태
+    private val _state = MutableLiveData(TicTacToeState()) // 게임의 현재 상태, tictactoestate를 새롭게 만듦.
     val state: LiveData<TicTacToeState> = _state // 외부에서 관찰 가능한 LiveData
 
     fun onCellClicked(index: Int){
@@ -48,5 +48,17 @@ class TicTacToeViewModel : ViewModel() {
         return null
     }
 
+    private val history = mutableListOf<TicTacToeState>()
+
+    fun saveState(state: TicTacToeState) {
+        history.add(state)
+        _state.value = state
+    } // 자동으로 각 state 저장하게 끔 하는 ..
+
+    fun goToState(index: Int) {
+        if (index in history.indices) {
+            _state.value = history[index]
+        }
+    }
 
 }
