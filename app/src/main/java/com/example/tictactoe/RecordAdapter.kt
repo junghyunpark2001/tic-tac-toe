@@ -7,9 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import TicTacToeState
 import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.GridLayoutManager
 
 data class RecordState( // 서랍의 9칸 + n턴 + 되돌아가기 버튼에 대한 data class.
-    val board: List<String> = List(9) { "" },  // 9개의 칸을 빈 문자열로 초기화
+    val board: List<String> = List(25) { "" },  // 9개의 칸을 빈 문자열로 초기화
     val turn: Int = 0,  // 현재 플레이어는 X로 시작
     val button: String = "되돌아가기"
 )
@@ -41,7 +42,9 @@ class RecordAdapter (private var items: MutableList<ListItem>, private val viewM
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):RecyclerView.ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_drawer, parent, false)
+
         return when (viewType) {
             TYPE_START -> {
                 val view = LayoutInflater.from(parent.context)
@@ -64,6 +67,7 @@ class RecordAdapter (private var items: MutableList<ListItem>, private val viewM
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
+
 
     override fun onBindViewHolder(
         holder: RecyclerView.ViewHolder,
@@ -116,6 +120,23 @@ class RecordAdapter (private var items: MutableList<ListItem>, private val viewM
             itemView.findViewById<TextView>(R.id.box_7).text = box[6]
             itemView.findViewById<TextView>(R.id.box_8).text = box[7]
             itemView.findViewById<TextView>(R.id.box_9).text = box[8]
+            itemView.findViewById<TextView>(R.id.box_10).text = box[9]
+            itemView.findViewById<TextView>(R.id.box_11).text = box[10]
+            itemView.findViewById<TextView>(R.id.box_12).text = box[11]
+            itemView.findViewById<TextView>(R.id.box_13).text = box[12]
+            itemView.findViewById<TextView>(R.id.box_14).text = box[13]
+            itemView.findViewById<TextView>(R.id.box_15).text = box[14]
+            itemView.findViewById<TextView>(R.id.box_16).text = box[15]
+            itemView.findViewById<TextView>(R.id.box_17).text = box[16]
+            itemView.findViewById<TextView>(R.id.box_18).text = box[17]
+            itemView.findViewById<TextView>(R.id.box_19).text = box[18]
+            itemView.findViewById<TextView>(R.id.box_20).text = box[19]
+            itemView.findViewById<TextView>(R.id.box_21).text = box[20]
+            itemView.findViewById<TextView>(R.id.box_22).text = box[21]
+            itemView.findViewById<TextView>(R.id.box_23).text = box[22]
+            itemView.findViewById<TextView>(R.id.box_24).text = box[23]
+            itemView.findViewById<TextView>(R.id.box_25).text = box[24]
+
 
 
             button.setOnClickListener{
@@ -147,6 +168,23 @@ class RecordAdapter (private var items: MutableList<ListItem>, private val viewM
             itemView.findViewById<TextView>(R.id.box_7).text = box[6]
             itemView.findViewById<TextView>(R.id.box_8).text = box[7]
             itemView.findViewById<TextView>(R.id.box_9).text = box[8]
+            itemView.findViewById<TextView>(R.id.box_10).text = box[9]
+            itemView.findViewById<TextView>(R.id.box_11).text = box[10]
+            itemView.findViewById<TextView>(R.id.box_12).text = box[11]
+            itemView.findViewById<TextView>(R.id.box_13).text = box[12]
+            itemView.findViewById<TextView>(R.id.box_14).text = box[13]
+            itemView.findViewById<TextView>(R.id.box_15).text = box[14]
+            itemView.findViewById<TextView>(R.id.box_16).text = box[15]
+            itemView.findViewById<TextView>(R.id.box_17).text = box[16]
+            itemView.findViewById<TextView>(R.id.box_18).text = box[17]
+            itemView.findViewById<TextView>(R.id.box_19).text = box[18]
+            itemView.findViewById<TextView>(R.id.box_20).text = box[19]
+            itemView.findViewById<TextView>(R.id.box_21).text = box[20]
+            itemView.findViewById<TextView>(R.id.box_22).text = box[21]
+            itemView.findViewById<TextView>(R.id.box_23).text = box[22]
+            itemView.findViewById<TextView>(R.id.box_24).text = box[23]
+            itemView.findViewById<TextView>(R.id.box_25).text = box[24]
+
 
 
             itemView.findViewById<TextView>(R.id.back).text = when {
@@ -204,7 +242,7 @@ class RecordAdapter (private var items: MutableList<ListItem>, private val viewM
 
 
     fun updateBoard(state: TicTacToeState) {
-        if (state.board != List(9) { "" } && state.isGameOver != true)
+        if (state.board != List(25) { "" } && state.isGameOver != true)
             this.addItem(ListItem.AfterItem(RecordState(state.board))) // recordAdapter에 보드 데이터 할당
         else {
             var text : String = ""

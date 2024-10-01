@@ -34,19 +34,52 @@ class TicTacToeViewModel : ViewModel() {
     }
 
     private fun checkWinner(board: List<String>): String? {
-        val winningCombinations = listOf(
-            listOf(0, 1, 2), listOf(3, 4, 5), listOf(6, 7, 8), // 가로 승리
-            listOf(0, 3, 6), listOf(1, 4, 7), listOf(2, 5, 8), // 세로 승리
-            listOf(0, 4, 8), listOf(2, 4, 6) // 대각선 승리
-        )
-        for (combination in winningCombinations) {
-            val (a, b, c) = combination
-            if (board[a].isNotEmpty() && board[a] == board[b] && board[b] == board[c]) {
-                return board[a]
+        val winningLength = 5 // 승리 조건: 5개 연속
+        val size = 5 // 보드 크기
+
+        // 가로 승리 체크
+        for (row in 0 until size) {
+            for (col in 0 until size - winningLength + 1) {
+                val cell = board[row * size + col]
+                if (cell.isNotEmpty() && (0 until winningLength).all { board[row * size + col + it] == cell }) {
+                    return cell
+                }
             }
         }
-        return null
+
+        // 세로 승리 체크
+        for (col in 0 until size) {
+            for (row in 0 until size - winningLength + 1) {
+                val cell = board[row * size + col]
+                if (cell.isNotEmpty() && (0 until winningLength).all { board[(row + it) * size + col] == cell }) {
+                    return cell
+                }
+            }
+        }
+
+        // 대각선 승리 체크 (왼쪽 위에서 오른쪽 아래)
+        for (row in 0 until size - winningLength + 1) {
+            for (col in 0 until size - winningLength + 1) {
+                val cell = board[row * size + col]
+                if (cell.isNotEmpty() && (0 until winningLength).all { board[(row + it) * size + (col + it)] == cell }) {
+                    return cell
+                }
+            }
+        }
+
+        // 대각선 승리 체크 (오른쪽 위에서 왼쪽 아래)
+        for (row in 0 until size - winningLength + 1) {
+            for (col in winningLength - 1 until size) {
+                val cell = board[row * size + col]
+                if (cell.isNotEmpty() && (0 until winningLength).all { board[(row + it) * size + (col - it)] == cell }) {
+                    return cell
+                }
+            }
+        }
+
+        return null // 승리자가 없으면 null 반환
     }
+
 
     private val history = mutableListOf<TicTacToeState>()
 

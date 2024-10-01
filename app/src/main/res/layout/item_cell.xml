@@ -5,8 +5,8 @@
     android:id="@+id/cellButton"
 
     android:layout_margin="10dp"
-    android:layout_width="100dp"
-    android:layout_height="100dp"
-    android:textSize="24sp"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:textSize="14sp"
     android:background="@color/light_yellow"
     android:text=""/>
